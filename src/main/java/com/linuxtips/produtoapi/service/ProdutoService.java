@@ -3,6 +3,7 @@ package com.linuxtips.produtoapi.service;
 import com.linuxtips.produtoapi.model.Produto;
 import com.linuxtips.produtoapi.repository.ProdutoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,7 @@ public class ProdutoService {
 
     public ResponseEntity<Produto> criarProduto(Produto produto){
         return
-                ResponseEntity.ok().body(
-                    produtoRepository.salvarProduto(produto)
-                );
+                new ResponseEntity<Produto>(produtoRepository.salvarProduto(produto), HttpStatus.CREATED);
     }
 
     public ResponseEntity<Produto> buscarProduto(String produtoId){
@@ -44,9 +43,11 @@ public class ProdutoService {
     public ResponseEntity<String> exlcuirProduto(String produtoId){
         return
                 produtoRepository.retornaProduto(produtoId)
-                        .map(produto -> ResponseEntity
-                                .ok()
-                                .body(produtoRepository.excluir(produto) )
+                        .map(produto -> {
+                            produtoRepository.excluir(produto);
+                            return new ResponseEntity<String>(HttpStatus.NO_CONTENT);
+
+                        }
                 ).orElse(ResponseEntity.notFound().build());
     }
 
